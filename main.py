@@ -1,8 +1,7 @@
-
 #!/usr/bin/env python3
 """
 __authors__    = ["Blaze Sanders"]
-__contact__    = "blazes@mfc.us"
+__contact__    = "blaze.d.a.sanders@gmail.com"
 __copyright__  = "Copyright 2023"
 __license__    = "MIT License"
 __status__     = "Development"
@@ -16,13 +15,20 @@ __doc__        = "Generate QR code with simple interger vales for asset tracking
 # pylint: disable=invalid-name
 # pylint: disable=global-statement
 
-# Installed using "pip install qrcode"
+# Generate custom QR codes with embedded images and exact ASCII text like 101-00420-69 
+# Installed using "pip install "qrcode[pil]" for advanced features
 # https://pypi.org/project/qrcode/
 import qrcode
+from qrcode.image.styledpil import StyledPilImage
 
 # Control MacOS, Windows, or Linux GUI to automate tasks
 # https://pyautogui.readthedocs.io/en/latest/index.html
-import pyautogui
+try:
+    pass
+    #import pyautogui
+except DisplayConnectionError:
+    # raise error.DisplayConnectionError(self.display_name, r.reason) Xlib.error.DisplayConnectionError: Can't connect to display ":0": b'Authorization required, but no authorization protocol specified'
+    print("Weird Linux X-Display error, skipping pyautogui import on Linux ONLY")
 
 # Pause program
 # https://realpython.com/python-sleep/
@@ -44,8 +50,19 @@ def generate_int_qr_codes(qty: int, startInt: int = 0) -> None:
         if qrCodeSerialNumber % 10000 == 0: print(f"{qrCodeSerialNumber/10000} * 10K QR codes generated!")
 
 
+def generate_picture_qr_codes(qty: int, startInt: int = 0) -> None:
+    # Serial number from 0 to 1,0000,000 for OpenBOM part numbers 100-00001 where 100 to 900
+    for qrCodeSerialNumber in range(startInt, qty):
+        qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_L)
+        qr.add_data(qrCodeSerialNumber)
+        img = qr.make_image(image_factory=StyledPilImage, embeded_image_path="/path/to/image.png")
+        type(img)  # The type is "qrcode.image.pil.PilImage"
+        img.save(f"images/ImageQR_{qrCodeSerialNumber}_SerialNumber.png")
+        if qrCodeSerialNumber % 10000 == 0: print(f"{qrCodeSerialNumber/10000} * 10K QR codes generated!")
+
+
 # TODO
-def convert_to_moe_build_part_number_qr_code(qrCodeSerialNumber: int, prefix: int, maxItemNumber: int, maxVerisonNumber: int) -> None:
+def convert_to_part_number_qr_code(qrCodeSerialNumber: int, prefix: int, maxItemNumber: int, maxVerisonNumber: int) -> None:
     # Moe Build LLC part numbers from 100-00001-1 to 999-99999-99 for OpenBOM cross reference
     for i in range(prefix, prefix+100):
         for j in range(maxItemNumber+1):
@@ -138,17 +155,17 @@ def select_box_and_highlight_text(boxNumber: int) -> None :
 
 
 if __name__ == "__main__":
-    generate_int_qr_codes(1000, 0)   # TODO Change this to generate_int_qr_codes(10000, 0) once code is polished
+    generate_int_qr_codes(10, 0)   # TODO Change this to generate_int_qr_codes(10000, 0) once code is polished
 
     image = "0_SerialNumber.png"
 
     # Pause 0.5 seconds after every command to give website on slow internet time to load
-    pyautogui.PAUSE = 0.5
+    # TODO FIX PYAUTOGUI IMPORT   pyautogui.PAUSE = 0.5
 
     # Moving the mouse to the upper-left will raise a pyautogui.FailSafeException and abort the program
-    pyautogui.FAILSAFE = True
+    # TODO FIX PYAUTOGUI IMPORT   pyautogui.FAILSAFE = True
 
-    # Start placing QR codes into a Apple Pages document from image files in oiut MFC GitHub repo
+    # Start placing QR codes into a Apple Pages document from image files in a  GitHub repo
     #TODO REMOVE AFTE TESTING VLADS CODE layout_pictures_in_apple_pages(image, shortSideQty=3, longSideQty=4)
 
     # TODO Useful anywhere? pyautogui.click('button.png') # Find where button.png appears on the screen and click it.
